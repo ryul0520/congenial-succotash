@@ -137,7 +137,7 @@
 
 <div class="container">
     <h1>🕵️‍♂️ 문맥 속 4개의 오류 찾기!</h1>
-    <div class="guide">🚨 AI가 무작위로 추출한 연속된 5문장 속에 <b>반의어 2개, 문법 오류 2개 (총 4개)</b>를 숨겼습니다!<br>전체 흐름(문맥)을 파악하여 어색한 단어를 클릭해 올바르게 고쳐보세요.</div>
+    <div class="guide">🚨 AI가 무작위로 추출한 연속된 5문장 속에 <b>어휘 오류(반의어 및 엉뚱한 동사) 2개, 문법 오류 2개 (총 4개)</b>를 숨겼습니다!<br>전체 흐름(문맥)을 파악하여 어색한 단어를 클릭해 올바르게 고쳐보세요.</div>
     
     <div class="controls">
         <select id="lesson-select" onchange="startNewGame()">
@@ -228,6 +228,7 @@ Unfortunately, most of us are influenced by cognitive biases.
 `
     };
 
+    // 형용사, 부사, 명사 및 동사의 반의어 및 문맥 어긋남 규정
     const contextRules = [
         { from: /\b(happy)\b/i, to: ["sad", "unhappy"] },
         { from: /\b(success)\b/i, to: ["failure"] },
@@ -281,7 +282,29 @@ Unfortunately, most of us are influenced by cognitive biases.
         { from: /\b(always)\b/i, to: ["never"] },
         { from: /\b(never)\b/i, to: ["always"] },
         { from: /\b(many)\b/i, to: ["few"] },
-        { from: /\b(much)\b/i, to: ["little"] }
+        { from: /\b(much)\b/i, to: ["little"] },
+        // --- 동사 관련 어휘 변형 (문맥 어긋남) ---
+        { from: /\b(accepts)\b/i, to: ["rejects", "denies"] },
+        { from: /\b(guarantees)\b/i, to: ["ruins", "prevents"] },
+        { from: /\b(leads)\b/i, to: ["blocks", "follows"] },
+        { from: /\b(became)\b/i, to: ["failed"] },
+        { from: /\b(exaggerating)\b/i, to: ["minimizing", "understating"] },
+        { from: /\b(composed)\b/i, to: ["destroyed", "copied"] },
+        { from: /\b(believed)\b/i, to: ["doubted", "denied"] },
+        { from: /\b(growing)\b/i, to: ["shrinking", "reducing"] },
+        { from: /\b(stimulating)\b/i, to: ["boring", "depressing"] },
+        { from: /\b(transformed)\b/i, to: ["maintained", "fixed"] },
+        { from: /\b(reproducing)\b/i, to: ["dying", "decreasing"] },
+        { from: /\b(develop)\b/i, to: ["destroy", "ruin"] },
+        { from: /\b(alter)\b/i, to: ["maintain", "keep"] },
+        { from: /\b(like)\b/i, to: ["hate", "dislike"] },
+        { from: /\b(affected)\b/i, to: ["unaffected", "ignored"] },
+        { from: /\b(appear)\b/i, to: ["disappear", "vanish"] },
+        { from: /\b(overcome)\b/i, to: ["surrender", "fail"] },
+        { from: /\b(conform)\b/i, to: ["rebel", "resist"] },
+        { from: /\b(encounter)\b/i, to: ["avoid", "miss"] },
+        { from: /\b(prevent)\b/i, to: ["cause", "encourage"] },
+        { from: /\b(influenced)\b/i, to: ["ignored", "unaffected"] }
     ];
 
     const grammarRules = [
@@ -349,16 +372,16 @@ Unfortunately, most of us are influenced by cognitive biases.
         }
 
         let maxErrors = 4; // 총 4개 출제
-        let targetContext = 2; // 반의어 목표 2개
-        let targetGrammar = 2; // 문법 목표 2개
+        let targetContext = 2; // 어휘 오류 목표 2개
+        let targetGrammar = 2; // 문법 오류 목표 2개
         
-        let contextCount = 0; // 현재 출제된 반의어 개수
-        let grammarCount = 0; // 현재 출제된 문법 개수
+        let contextCount = 0; // 현재 출제된 어휘 오류 개수
+        let grammarCount = 0; // 현재 출제된 문법 오류 개수
 
         let indices = Array.from({length: tempTokens.length}, (_, i) => i);
         shuffle(indices);
 
-        // 1단계: 반의어 2개, 문법 2개를 채울 때까지 랜덤하게 적용
+        // 1단계: 어휘 2개, 문법 2개를 채울 때까지 랜덤하게 적용
         for (let idx of indices) {
             if (contextCount >= targetContext && grammarCount >= targetGrammar) break;
             
@@ -379,7 +402,7 @@ Unfortunately, most of us are influenced by cognitive biases.
                     rulesToTry.push({ type: 'context', data: contextRules });
                 }
             } 
-            // 반의어만 남았다면 반의어만 검사
+            // 어휘만 남았다면 어휘만 검사
             else if (needsContext) {
                 rulesToTry.push({ type: 'context', data: contextRules });
             } 
